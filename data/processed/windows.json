@@ -1,0 +1,93 @@
+[
+  {
+    "territory": "Москва",
+    "country": "Россия",
+    "unit_type": "город",
+    "population": 12678079,
+    "date_start": "2020-03-26",
+    "date_end": "2020-08-15",
+    "n_days": 143,
+    "cumulative_end": 251140.0,
+    "cumulative_rel_end": 251140.0,
+    "daily_peak": 6703.0,
+    "daily_peak_date": "2020-05-07"
+  },
+  {
+    "territory": "Псковская область",
+    "country": "Россия",
+    "unit_type": "регион",
+    "population": 626115,
+    "date_start": "2020-03-26",
+    "date_end": "2020-08-15",
+    "n_days": 143,
+    "cumulative_end": 4103.0,
+    "cumulative_rel_end": 4103.0,
+    "daily_peak": 112.0,
+    "daily_peak_date": "2020-06-04"
+  },
+  {
+    "territory": "Калининградская область",
+    "country": "Россия",
+    "unit_type": "регион",
+    "population": 1012512,
+    "date_start": "2020-03-26",
+    "date_end": "2020-08-15",
+    "n_days": 143,
+    "cumulative_end": 3090.0,
+    "cumulative_rel_end": 3090.0,
+    "daily_peak": 54.0,
+    "daily_peak_date": "2020-06-02"
+  },
+  {
+    "territory": "Новгородская область",
+    "country": "Россия",
+    "unit_type": "регион",
+    "population": 596508,
+    "date_start": "2020-03-26",
+    "date_end": "2020-08-15",
+    "n_days": 143,
+    "cumulative_end": 4009.0,
+    "cumulative_rel_end": 4009.0,
+    "daily_peak": 89.0,
+    "daily_peak_date": "2020-05-26"
+  },
+  {
+    "territory": "Нью-Йорк",
+    "country": "США",
+    "unit_type": "город",
+    "population": 8336817,
+    "date_start": "2020-02-29",
+    "date_end": "2020-07-31",
+    "n_days": 154,
+    "cumulative_end": 223522.0,
+    "cumulative_rel_end": 223522.0,
+    "daily_peak": 6353.0,
+    "daily_peak_date": "2020-04-06"
+  },
+  {
+    "territory": "Милан",
+    "country": "Италия",
+    "unit_type": "провинция",
+    "population": 3259000,
+    "date_start": "2020-02-25",
+    "date_end": "2020-07-31",
+    "n_days": 158,
+    "cumulative_end": 24926.0,
+    "cumulative_rel_end": 24926.0,
+    "daily_peak": 868.0,
+    "daily_peak_date": "2020-03-21"
+  },
+  {
+    "territory": "Дели",
+    "country": "Индия",
+    "unit_type": "город",
+    "population": 19800000,
+    "date_start": "2021-03-01",
+    "date_end": "2021-07-31",
+    "n_days": 136,
+    "cumulative_end": 1222196.0,
+    "cumulative_rel_end": 797173.0,
+    "daily_peak": 76719.0,
+    "daily_peak_date": "2021-04-21"
+  }
+]

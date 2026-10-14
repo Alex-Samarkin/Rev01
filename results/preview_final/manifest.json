@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "backend": "native",
+  "rasterEngine": "libreoffice",
+  "source": "saved",
+  "inputPath": "C:\\Users\\Alex\\Rev01\\article\\article.docx",
+  "sourceSha256": "4c4ac59b64fd042fc4c9fa107b6304f4b12b9fcd4d52727887adba4eeed6a224",
+  "dpi": 100,
+  "pageCount": 7,
+  "images": [
+    {
+      "index": 1,
+      "page": 1,
+      "path": "C:\\Users\\Alex\\Rev01\\results\\preview_final\\page-0001.png",
+      "width": 850,
+      "height": 1100,
+      "rectangle": {
+        "x": 0,
+        "y": 0,
+        "width": 816,
+        "height": 1056
+      },
+      "byteLength": 137837
+    },
+    {
+      "index": 2,
+      "page": 5,
+      "path": "C:\\Users\\Alex\\Rev01\\results\\preview_final\\page-0002.png",
+      "width": 850,
+      "height": 1100,
+      "rectangle": {
+        "x": 0,
+        "y": 0,
+        "width": 816,
+        "height": 1056
+      },
+      "byteLength": 96804
+    }
+  ],
+  "missingFonts": [
+    "Courier"
+  ]
+}

@@ -1,0 +1,18 @@
+# ---- Окружения и кэши (восстанавливаются, суммарно ~490 МБ) ----
+.uv-cache/
+code/python/.venv/
+.julia/
+.mpl/
+__pycache__/
+*.pyc
+
+# ---- Промежуточные рендеры вёрстки статьи ----
+# итоговый набор остаётся в results/preview_final/
+results/preview_v[0-9]*/
+results/preview_v[0-9][0-9]*/
+
+# ---- Служебное ----
+.vscode/*.log
+*.tmp
+Thumbs.db
+desktop.ini

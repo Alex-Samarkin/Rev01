@@ -1,0 +1,37 @@
+{
+  "downloaded_at_utc": "2026-10-14T10:49:21.628Z",
+  "files": [
+    {
+      "file": "nyc_cases_by_day.csv",
+      "url": "https://raw.githubusercontent.com/nychealth/coronavirus-data/master/trends/cases-by-day.csv",
+      "source": "New York City Department of Health and Mental Hygiene (NYC DOHMH), репозиторий nychealth/coronavirus-data, файл trends/cases-by-day.csv",
+      "territory": "Нью-Йорк (США)",
+      "bytes": 205028,
+      "sha256": "596e8391984c7c1edc730e61f9a35fed5d20c88b4e9b0be500eac69208238826"
+    },
+    {
+      "file": "pcm_dpc_province.csv",
+      "url": "https://raw.githubusercontent.com/pcm-dpc/COVID-19/master/dati-province/dpc-covid19-ita-province.csv",
+      "source": "Dipartimento della Protezione Civile (Италия), репозиторий pcm-dpc/COVID-19, файл dati-province/dpc-covid19-ita-province.csv",
+      "territory": "провинции Италии (в т.ч. Милан)",
+      "bytes": 25226272,
+      "sha256": "d9f39377b0c3b0e8f4ac68b8e57cd9c1e953a4b922574b9438dc62094fb6446f"
+    },
+    {
+      "file": "ru_regions_infected.csv",
+      "url": "https://raw.githubusercontent.com/artem-kuchumov/covid-russia/master/data-infected.csv",
+      "source": "Набор данных «COVID-19 в России» (artem-kuchumov/covid-russia), data-infected.csv — накопленное число случаев по субъектам РФ",
+      "territory": "субъекты РФ (в т.ч. Москва, Псковская, Калининградская области)",
+      "bytes": 88370,
+      "sha256": "749cf93b8e0ee7e32570c4250a8e77df8249e5e7817ce7f4c979be37d8cb5b5a"
+    },
+    {
+      "file": "in_delhi_cumulative.csv",
+      "url": "https://raw.githubusercontent.com/IBM/covid19-india-data/main/data/csv/DL/DL_cumulative.csv",
+      "source": "IBM covid19-india-data, data/csv/DL/DL_cumulative.csv — накопленные случаи, Дели",
+      "territory": "Дели (Индия)",
+      "bytes": 29155,
+      "sha256": "dfe8edc95616635f18ddc5e1a96d5e544ecf02f3d14119f6192956eb933db891"
+    }
+  ]
+}
