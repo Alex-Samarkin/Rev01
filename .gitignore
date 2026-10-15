@@ -19,9 +19,10 @@ article/wave*_report*.pdf
 results/pdf_preview*/
 
 # ---- Тяжёлые данные: в репозиторий идёт только архив ----
-# timeseries_full.json (24 МБ) хранится в репозитории как timeseries_full.json.zip (1,8 МБ);
-# распакованный файл остаётся на диске и в git не попадает
+# распакованные файлы остаются на диске и в git не попадают;
+# целостность архивов проверена по SHA-256 (см. data/manifest.json)
 timeseries_full.json
+data/raw/pcm_dpc_province.csv
 
 # ---- Служебное ----
 .vscode/*.log
