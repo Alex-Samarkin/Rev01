@@ -37,9 +37,9 @@ md"""
 # ╔═╡ 9864ef40-c7d1-11f1-b2aa-2973f7b8242c
 begin
     # data_path = "covid_data_moscow_region_weekly_2021.csv"
-    data_path = "csv_moskov.csv"
+    # data_path = "csv_moskov.csv"
     # Волны по Москве (CSV, см. папку data/):
-    # data_path = "data/moscow_wave1_autumn_winter_2020.csv"  # 2020-09-01 → 2021-03-13
+    data_path = "data/moscow_wave1_autumn_winter_2020.csv"  # 2020-09-01 → 2021-03-13
     # data_path = "data/moscow_wave2_delta_2021.csv"          # 2021-05-25 → 2021-09-01
     # data_path = "data/moscow_wave3_autumn_2021.csv"         # 2021-09-01 → 2022-01-03
 
@@ -89,18 +89,27 @@ y_i=\frac{C_i - C_{i-1}}{t_i - t_{i-1}}.
 
 # ╔═╡ 9864ef40-c7d1-11f1-bcd9-ed23986dbbeb
 begin
-    # Границы окна должны попадать в диапазон данных (csv_moskov.csv: 06.01.2021–04.02.2021)
-    wave_start = Date(2021, 1, 1)
+    # Границы окна должны попадать в диапазон данных выбранного файла
+    # (csv_moskov.csv: 06.01.2021–04.02.2021; wave1: 01.09.2020–13.03.2021)
+    # wave_start = Date(2021, 1, 1)
+    # wave_end = Date(2021, 1, 31)
+    # Осень–зима 2020/21 (data/moscow_wave1_autumn_winter_2020.csv)
+    wave_start = Date(2020, 9, 1)
     wave_end = Date(2021, 1, 31)
-    
+
     in_window = filter(row -> wave_start <= row.date <= wave_end, df)
     nrow(in_window) >= 3 || error("В окне [$wave_start, $wave_end] меньше 3 точек данных")
     
     step_days = Dates.value.(diff(in_window.date))
     wave = in_window[2:end, :]
     wave.daily_rate = diff(Float64.(in_window.cases)) ./ step_days
+    # wave.smoothed = [
+    #     mean(wave.daily_rate[max(1, i - 1):min(end, i + 1)])
+    #     for i in eachindex(wave.daily_rate)
+    # ]
+    # Центрированное среднее за 7 суток (убирает недельную периодичность отчётности)
     wave.smoothed = [
-        mean(wave.daily_rate[max(1, i - 1):min(end, i + 1)])
+        mean(wave.daily_rate[max(1, i - 3):min(end, i + 3)])
         for i in eachindex(wave.daily_rate)
     ]
     
@@ -272,30 +281,75 @@ end
 
 # ╔═╡ 9864ef40-c7d1-11f1-930c-2d821e3c113f
 begin
-    theta0_classical = log.([0.35, 1/5, 1/10, 0.5])
-    theta0_fractional = vcat(log.([0.35, 1/5, 1/10, 0.5]), [2.0])  # alpha0 ≈ 0.88
-    
-    result_classical = optimize(
-        loss_classical,
-        theta0_classical,
-        NelderMead(),
-        Optim.Options(iterations = 2000)
+    # --- Старый вариант: подгонка всех параметров из одной стартовой точки ---
+    # theta0_classical = log.([0.35, 1/5, 1/10, 0.5])
+    # theta0_fractional = vcat(log.([0.35, 1/5, 1/10, 0.5]), [2.0])  # alpha0 ≈ 0.88
+    #
+    # result_classical = optimize(
+    #     loss_classical,
+    #     theta0_classical,
+    #     NelderMead(),
+    #     Optim.Options(iterations = 2000)
+    # )
+    #
+    # result_fractional = optimize(
+    #     loss_fractional,
+    #     theta0_fractional,
+    #     NelderMead(),
+    #     Optim.Options(iterations = 3000)
+    # )
+
+    # --- Новый вариант: sigma и gamma фиксированы (литература), мульти-старт ---
+    sigma_fixed = 1 / 5.5     # инкубация ≈ 5.5 суток
+    gamma_fixed = 1 / 10.0    # длительность заразности ≈ 10 суток
+    n_starts = 12
+
+    # Подгоняем theta = [log beta, log q] (классическая) и [log beta, log q, logit alpha] (дробная)
+    loss_classical_fixed(th) =
+        loss_classical([th[1], log(sigma_fixed), log(gamma_fixed), th[2]])
+    loss_fractional_fixed(th) =
+        loss_fractional([th[1], log(sigma_fixed), log(gamma_fixed), th[2], th[3]])
+
+    Random.seed!(2024)
+    starts_beta = exp.(range(log(0.15), log(1.5), length = n_starts))
+    starts_scale = exp.(range(log(0.02), log(0.5), length = n_starts))[randperm(n_starts)]
+    starts_alpha = range(0.5, 0.95, length = n_starts)[randperm(n_starts)]
+
+    function best_of(loss, starts; iterations)
+        results = [
+            optimize(loss, s, NelderMead(), Optim.Options(iterations = iterations))
+            for s in starts
+        ]
+        results[argmin(Optim.minimum.(results))], Optim.minimum.(results)
+    end
+
+    best_classical, losses_classical = best_of(
+        loss_classical_fixed,
+        [[log(b), log(q)] for (b, q) in zip(starts_beta, starts_scale)];
+        iterations = 1000
     )
-    
-    result_fractional = optimize(
-        loss_fractional,
-        theta0_fractional,
-        NelderMead(),
-        Optim.Options(iterations = 3000)
+    best_fractional, losses_fractional = best_of(
+        loss_fractional_fixed,
+        [[log(b), log(q), log(a / (1 - a))] for (b, q, a) in zip(starts_beta, starts_scale, starts_alpha)];
+        iterations = 1000
     )
-    
+
+    # Совместимость с ячейками ниже: восстанавливаем полный вектор theta
+    result_classical = best_classical
+    result_fractional = best_fractional
+    theta_classical_full = [Optim.minimizer(best_classical)[1], log(sigma_fixed), log(gamma_fixed), Optim.minimizer(best_classical)[2]]
+    theta_fractional_full = [Optim.minimizer(best_fractional)[1], log(sigma_fixed), log(gamma_fixed),
+                             Optim.minimizer(best_fractional)[2], Optim.minimizer(best_fractional)[3]]
+
     result_classical, result_fractional
 end
 
 # ╔═╡ 9864ef40-c7d1-11f1-a56f-659763d49c26
 begin
-    theta_classical = Optim.minimizer(result_classical)
-    theta_fractional = Optim.minimizer(result_fractional)
+    # theta_classical = Optim.minimizer(result_classical)
+    # theta_fractional = Optim.minimizer(result_fractional)
+    theta_classical = theta_classical_full
+    theta_fractional = theta_fractional_full
     
     beta_c, sigma_c, gamma_c, scale_c = exp.(theta_classical)
     beta_f, sigma_f, gamma_f, scale_f = exp.(theta_fractional[1:4])
@@ -336,6 +390,71 @@ begin
     plot!(wave.date, pred_fractional, label = "Caputo-дробная SEIR", lw = 2, ls = :dot)
 end
 
+# ╔═╡ 9864ef40-c7d1-11f1-a001-5a9c2f1e7b01
+begin
+    # Остатки (модель − данные) и проверка, не упёрлись ли параметры в границы in_bounds
+    plot(
+        wave.date, pred_classical .- observed,
+        label = "Классическая SEIR", lw = 2,
+        xlabel = "Дата", ylabel = "Остаток, случаев в сутки", legend = :topleft
+    )
+    plot!(wave.date, pred_fractional .- observed, label = "Caputo-дробная SEIR", lw = 2, ls = :dash)
+    hline!([0.0], color = :black, label = "")
+end
+
+# ╔═╡ 9864ef40-c7d1-11f1-a002-5a9c2f1e7b02
+begin
+    bound_check = DataFrame(
+        parameter = ["beta", "sigma", "gamma", "scale"],
+        classical = [beta_c, sigma_c, gamma_c, scale_c],
+        fractional = [beta_f, sigma_f, gamma_f, scale_f],
+        lower = [0.01, 0.02, 0.02, 1e-3],
+        upper = [5.0, 1.0, 1.0, 1.0],
+    )
+    bound_check.classical_at_bound = [
+        !(1.01 * l < v < 0.99 * u) for (v, l, u) in zip(bound_check.classical, bound_check.lower, bound_check.upper)
+    ]
+    bound_check.fractional_at_bound = [
+        !(1.01 * l < v < 0.99 * u) for (v, l, u) in zip(bound_check.fractional, bound_check.lower, bound_check.upper)
+    ]
+    peak_day = DataFrame(
+        series = ["Данные", "Классическая", "Дробная"],
+        peak_day = [argmax(observed), argmax(pred_classical), argmax(pred_fractional)] .- 1,
+        peak_value = [maximum(observed), maximum(pred_classical), maximum(pred_fractional)],
+    )
+    bound_check, peak_day
+end
+
+# ╔═╡ 9864ef40-c7d1-11f1-a003-5a9c2f1e7b03
+begin
+    # Устойчивость мульти-старта: итоговый лосс (RMSE) по каждой из стартовых точек.
+    # Если все точки лежат на одном уровне, минимум единственный и фит устойчив.
+    plot(
+        1:n_starts, sqrt.(losses_classical),
+        seriestype = :scatter, label = "Классическая SEIR",
+        xlabel = "Номер стартовой точки", ylabel = "RMSE после оптимизации",
+        legend = :topright, markersize = 6
+    )
+    plot!(
+        1:n_starts, sqrt.(losses_fractional),
+        seriestype = :scatter, label = "Caputo-дробная SEIR", markershape = :diamond, markersize = 6
+    )
+end
+
+# ╔═╡ 9864ef40-c7d1-11f1-a004-5a9c2f1e7b04
+begin
+    # Предсказание против данных: точки у диагонали — хорошее соответствие
+    lim = (0.0, 1.05 * maximum(observed))
+    plot(
+        observed, pred_classical,
+        seriestype = :scatter, label = "Классическая SEIR",
+        xlabel = "Данные, случаев в сутки", ylabel = "Модель, случаев в сутки",
+        xlims = lim, ylims = lim, legend = :topleft, alpha = 0.6
+    )
+    plot!(observed, pred_fractional, seriestype = :scatter, label = "Caputo-дробная SEIR", alpha = 0.6)
+    plot!([0.0, lim[2]], [0.0, lim[2]], color = :black, ls = :dash, label = "y = x")
+end
+
 # ╔═╡ 9864ef40-c7d1-11f1-937e-5569d2afbbe8
 md"""
 ## Диагностика
@@ -364,4 +483,8 @@ md"""
 # ╠═9864ef40-c7d1-11f1-930c-2d821e3c113f
 # ╠═9864ef40-c7d1-11f1-a56f-659763d49c26
 # ╠═9864ef40-c7d1-11f1-9cd7-7ddeb47e4ea7
+# ╠═9864ef40-c7d1-11f1-a001-5a9c2f1e7b01
+# ╠═9864ef40-c7d1-11f1-a002-5a9c2f1e7b02
+# ╠═9864ef40-c7d1-11f1-a003-5a9c2f1e7b03
+# ╠═9864ef40-c7d1-11f1-a004-5a9c2f1e7b04
 # ╠═9864ef40-c7d1-11f1-937e-5569d2afbbe8

@@ -97,7 +97,9 @@ using JSON, DataFrames, CSV, Dates, Plots
 #   Чукотский автономный округ
 #   Республика Алтай
 #   Чувашская Республика
-const SUBJECT = "Москва"
+
+# const SUBJECT = "Москва"
+const SUBJECT = "Ханты-Мансийский АО"
 const JSON_PATH = joinpath(@__DIR__, "timeseries.json")
 const OUTPUT_DIR = joinpath(@__DIR__, "figures", "timeseries", SUBJECT)
 
